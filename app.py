@@ -6,10 +6,7 @@ from paste.translogger import TransLogger
 from flask import request, Response
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
+logging.basicConfig(level=logging.INFO,format=config.LOGGING_FORMAT)
 
 app = flask.Flask(__name__)
 database.init(app)
@@ -18,6 +15,11 @@ database.init(app)
 def index():
     return "HELLO WORLD"
 
+
+
+
+
+# log the request
 @app.after_request
 def log_request(response: Response) -> Response:
 
