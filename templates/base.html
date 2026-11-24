@@ -1,0 +1,40 @@
+ 
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- impostazione per i dispositivi mobili -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Iacopo Brunialti{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <nav class="navigation-menu">
+            <a class="logo" href="{{ url_for('index') }}">
+                home
+            </a>
+
+            <div class="navigation-links">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('login') }}">Accedi</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        Creato da Iacopo Brunialti
+    </footer>
+
+</body>
+</html>

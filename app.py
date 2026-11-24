@@ -13,8 +13,11 @@ database.init(app)
 
 @app.route('/')
 def index():
-    return "HELLO WORLD"
+    return flask.render_template("index.html")
 
+@app.route('/login')
+def login():
+    return flask.render_template("login.html")
 
 
 
