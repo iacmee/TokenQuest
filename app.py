@@ -1,8 +1,15 @@
 import flask
-import os
-
-DATABASE_PATH = os.getcwd() + "/data" + "app.sqlite"
+import config
+import database
+from waitress import serve
 
 app = flask.Flask(__name__)
-app.config.update(DATABASE = DATABASE_PATH)
+database.init(app)
 
+@app.route('/')
+def index():
+    return "HELLO WORLD"
+
+
+if __name__ == "__main__":
+    serve(app, host=config.HOST, port=config.PORT, threads=config.THREADS_NUM)
