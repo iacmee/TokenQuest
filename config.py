@@ -9,7 +9,8 @@ LOGGING_FORMAT="%(asctime)s [%(levelname)s] %(message)s"
 
 METEO_COORDINATE_URL = "https://geocoding-api.open-meteo.com/v1/search"
 METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
-FORECAST_DAYS = 3
+DEFAULT_FORECAST_DAYS = 3
+MAX_FORECAST_DAYS = 15
 WEEK_DAYS = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica']
 
 ROOT_PATH = Path(__file__).resolve().parent

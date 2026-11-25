@@ -1,11 +1,54 @@
 {% extends "base.html" %}
-{% block title %}Home · Iacopo Brunialti{% endblock %}
-
+{% block title %}Home · TokenQuest{% endblock %}
 
 {% block content %}
+<section class="weather-panel" aria-labelledby="weather-title">
+    <h1 id="weather-title">Previsioni meteo</h1>
+    <p>Cerca una città e scegli per quanti giorni vedere le previsioni.</p>
 
+    <form class="weather-form" method="get" action="{{ url_for('index') }}">
+        <div class="weather-search">
+            <div class="weather-city">
+                <label for="city">Città</label>
+                <input id="city" name="city" type="search" value="{{ city }}"
+                    placeholder="Es. Roma" minlength="2" maxlength="100" required>
+            </div>
+            <div>
+                <label for="days">Giorni</label>
+                <select id="days" name="days">
+                    {% for count in range(1, max_days + 1) %}
+                        <option value="{{ count }}"{% if count == days %} selected{% endif %}>{{ count }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Cerca</button>
+        </div>
+    </form>
 
-<h1>Hello world</h1>
-
-
+    {% if error %}
+        <p class="weather-error" id="weather-error" role="alert">{{ error }}</p>
+    {% elif weather %}
+        <table class="weather-table" aria-describedby="weather-temperatures">
+            <caption>{{ weather.name }}{% if weather.country %}, {{ weather.country }}{% endif %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Giorno</th>
+                    <th scope="col">Diurna <small>(massima)</small></th>
+                    <th scope="col">Notturna <small>(minima)</small></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in weather.days %}
+                    <tr>
+                        <th scope="row">{{ day.label }} <span>{{ day.date }}</span></th>
+                        <td>{% if day.max_temp is not none %}{{ day.max_temp }} °C{% else %}—{% endif %}</td>
+                        <td>{% if day.min_temp is not none %}{{ day.min_temp }} °C{% else %}—{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p id="weather-temperatures">La massima e la minima giornaliere sono usate come stime delle temperature diurna e notturna.</p>
+        <p>Previsioni fornite da <a href="https://open-meteo.com/en/docs">Open-Meteo</a>.</p>
+    {% endif %}
+</section>
 {% endblock %}

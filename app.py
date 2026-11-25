@@ -45,7 +45,7 @@ def fetch_json_from_url(url: str, parameters: dict[str, Any]) -> Any:
     with urlopen(full_url, timeout=6) as response:
         return json.load(response)
 
-def weather_from_city(city : str) -> dict | None:
+def weather_from_city(city: str, days: int = config.DEFAULT_FORECAST_DAYS) -> dict | None:
     params = {
         "name": city,
         "count": 1,
@@ -63,7 +63,7 @@ def weather_from_city(city : str) -> dict | None:
             "longitude": location["longitude"],
             "timezone": location["timezone"],
             "daily": "temperature_2m_max,temperature_2m_min",
-            "forecast_days": config.FORECAST_DAYS,
+            "forecast_days": days,
         }
 
         forecast = fetch_json_from_url(config.METEO_FORECAST_URL, params)
@@ -73,17 +73,17 @@ def weather_from_city(city : str) -> dict | None:
         max_temps = forecast["temperature_2m_max"]
         min_temps = forecast["temperature_2m_min"]
 
-        days = []
+        daily_forecasts = []
 
         for day, max_temp, min_temp in zip(dates, max_temps, min_temps, strict=True):
             parsed = date.fromisoformat(day)
-            days.append({
+            daily_forecasts.append({
                 "label": config.WEEK_DAYS[parsed.weekday()],
                 "date": parsed.strftime("%d/%m/%Y"),
                 "max_temp": max_temp,
                 "min_temp": min_temp,
             })
-        return {'name': location['name'], 'country': location.get('country', ''), 'days': days}
+        return {'name': location['name'], 'country': location.get('country', ''), 'days': daily_forecasts}
 
     except Exception as e:
         logging.error("Unable to retrieve weather data for %s: %s", city, e)
@@ -92,8 +92,31 @@ def weather_from_city(city : str) -> dict | None:
 
 
 @app.route('/')
-def index():
-    return flask.render_template("index.html")
+def index() -> ResponseReturnValue:
+    query = request.args.get("city")
+    city = query.strip() if query is not None else ""
+    days = request.args.get("days", type=int)
+    weather = None
+    error = None
+
+    if "days" not in request.args:
+        days = config.DEFAULT_FORECAST_DAYS
+    elif days is None or not 1 <= days <= config.MAX_FORECAST_DAYS:
+        error = f"Scegli da 1 a {config.MAX_FORECAST_DAYS} giorni."
+        days = config.DEFAULT_FORECAST_DAYS
+
+    if query is not None and error is None:
+        if not 2 <= len(city) <= 100:
+            error = "Inserisci un nome di città da 2 a 100 caratteri."
+        else:
+            weather = weather_from_city(city, days)
+            if not weather or not weather["days"]:
+                error = "Previsioni non disponibili. Controlla il nome della città o riprova più tardi."
+
+    return flask.render_template(
+        "index.html", city=city, days=days, max_days=config.MAX_FORECAST_DAYS,
+        weather=weather, error=error,
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login() -> ResponseReturnValue:
