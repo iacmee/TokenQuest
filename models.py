@@ -5,6 +5,24 @@ import config
 db = SQLAlchemy()
 
 
+class Question(db.Model):
+    __tablename__ = "questions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    options = db.Column(db.JSON, nullable=False)
+    correct_option = db.Column(db.Integer, nullable=False)
+
+
+class QuizRound(db.Model):
+    __tablename__ = "quiz_rounds"
+
+    user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
+    question_ids = db.Column(db.JSON, nullable=False)
+    position = db.Column(db.Integer, nullable=False, default=0)
+    correct_answers = db.Column(db.Integer, nullable=False, default=0)
+
+
 class User(db.Model):
 
     __tablename__ = "users"

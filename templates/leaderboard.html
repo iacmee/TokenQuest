@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Classifica · TokenQuest{% endblock %}
+
+{% block content %}
+<section class="leaderboard-panel" aria-labelledby="leaderboard-title">
+    <h1 id="leaderboard-title">Classifica</h1>
+
+    {% if players %}
+        <table class="leaderboard-table" aria-labelledby="leaderboard-title">
+            <thead>
+                <tr>
+                    <th scope="col">Posizione</th>
+                    <th scope="col">Nickname</th>
+                    <th scope="col">Punti</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <th scope="row">{{ player.nickname }}</th>
+                        <td>{{ player.score }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nessun giocatore in classifica.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -18,7 +18,9 @@ main {
     flex: 1;
 }
 
-.weather-panel {
+.weather-panel,
+.leaderboard-panel,
+.quiz-panel {
     width: min(100% - 2rem, 48rem);
     margin: clamp(1.5rem, 5vw, 4rem) auto;
     padding: clamp(1rem, 4vw, 2.5rem);
@@ -28,9 +30,35 @@ main {
     box-shadow: 0 12px 30px rgba(3, 105, 161, 0.08);
 }
 
-.weather-panel h1 {
+.weather-panel h1,
+.leaderboard-panel h1,
+.quiz-panel h1 {
     margin: 0;
     font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.quiz-options {
+    min-width: 0;
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+}
+
+.quiz-options legend {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    font-weight: 700;
+}
+
+.quiz-options label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    margin-bottom: 0.5rem;
+    padding: 0.7rem;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 .weather-form label {
@@ -80,7 +108,8 @@ main {
     color: #991b1b;
 }
 
-.weather-table {
+.weather-table,
+.leaderboard-table {
     width: 100%;
     margin-top: 1.5rem;
     border-collapse: collapse;
@@ -95,13 +124,25 @@ main {
 }
 
 .weather-table th,
-.weather-table td {
+.weather-table td,
+.leaderboard-table th,
+.leaderboard-table td {
     padding: 0.65rem 0.35rem;
     border-bottom: 1px solid #bae6fd;
 }
 
-.weather-table thead {
+.weather-table thead,
+.leaderboard-table thead {
     background: #e0f2fe;
+}
+
+.leaderboard-table th[scope="row"] {
+    overflow-wrap: anywhere;
+}
+
+.leaderboard-table td:last-child,
+.leaderboard-table th:last-child {
+    text-align: right;
 }
 
 .weather-table small,

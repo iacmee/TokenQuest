@@ -6,7 +6,7 @@
 <section class="registration">
     <h1>Accedi</h1>
     <form method="post" action="{{ url_for('login') }}">
-        {{ form.hidden_tag() }} <!-- there will be generated csrf-token -->
+        {{ form.hidden_tag() }} <!-- there will be generated csrf-token and other hidden fields -->
 
         {% for field, autocomplete in [
             (form.username, "username"),

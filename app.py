@@ -3,7 +3,8 @@ import config
 import sqlite3
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from forms import LoginForm, RegistrationForm
-from models import db, User
+from models import db, Question, QuizRound, User
+from questions import INITIAL_QUESTIONS
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.security import check_password_hash, generate_password_hash
 from waitress import serve
@@ -14,7 +15,8 @@ import json
 from urllib.parse import urlencode
 from urllib.request import urlopen
 from typing import Any
-from datetime import date
+from datetime import datetime
+from statistics import mean
 
 logging.basicConfig(level=logging.INFO,format=config.LOGGING_FORMAT)
 
@@ -32,8 +34,19 @@ try:
     with app.app_context():
         with db.engine.connect() as conn:
             conn.exec_driver_sql("PRAGMA journal_mode=WAL")
-
-        db.create_all()
+            conn.exec_driver_sql("BEGIN IMMEDIATE")
+            db.metadata.create_all(conn)
+            question_count = conn.scalar(db.select(db.func.count()).select_from(Question))
+            if question_count < len(INITIAL_QUESTIONS):
+                existing_texts = set(conn.scalars(db.select(Question.text)))
+                missing_questions = [
+                    {"text": text, "options": options, "correct_option": correct_option}
+                    for text, options, correct_option in INITIAL_QUESTIONS
+                    if text not in existing_texts
+                ]
+                if missing_questions:
+                    conn.execute(Question.__table__.insert(), missing_questions)
+            conn.commit()
 
 except SQLAlchemyError as e:
     print(f"Database error: {e}")
@@ -62,26 +75,34 @@ def weather_from_city(city: str, days: int = config.DEFAULT_FORECAST_DAYS) -> di
             "latitude": location["latitude"],
             "longitude": location["longitude"],
             "timezone": location["timezone"],
-            "daily": "temperature_2m_max,temperature_2m_min",
+            "hourly": "temperature_2m,is_day",
+            "temperature_unit": "celsius",
             "forecast_days": days,
         }
 
-        forecast = fetch_json_from_url(config.METEO_FORECAST_URL, params)
-        forecast = forecast["daily"]
-    
-        dates = forecast["time"]
-        max_temps = forecast["temperature_2m_max"]
-        min_temps = forecast["temperature_2m_min"]
+        hourly = fetch_json_from_url(config.METEO_FORECAST_URL, params)["hourly"]
+        temperatures_by_date = {}
+        for timestamp, temperature, is_day in zip(
+            hourly["time"], hourly["temperature_2m"], hourly["is_day"], strict=True):
+            day = datetime.fromisoformat(timestamp).date()
+            if day not in temperatures_by_date:
+                temperatures_by_date[day] = {0: [], 1: []}
+            # note that is_day is either 0 or 1
+            temperatures = temperatures_by_date[day]
+            if temperature is not None and is_day in temperatures:
+                temperatures[is_day].append(temperature)
 
         daily_forecasts = []
 
-        for day, max_temp, min_temp in zip(dates, max_temps, min_temps, strict=True):
-            parsed = date.fromisoformat(day)
+        # it could be sorted because is a date obj
+        for day, temperatures in sorted(temperatures_by_date.items()):
+            daytime = temperatures[1]
+            nighttime = temperatures[0]
             daily_forecasts.append({
-                "label": config.WEEK_DAYS[parsed.weekday()],
-                "date": parsed.strftime("%d/%m/%Y"),
-                "max_temp": max_temp,
-                "min_temp": min_temp,
+                "label": config.WEEK_DAYS[day.weekday()],
+                "date": day.strftime("%d/%m/%Y"),
+                "day_temp": round(mean(daytime), 1) if daytime else None,
+                "night_temp": round(mean(nighttime), 1) if nighttime else None,
             })
         return {'name': location['name'], 'country': location.get('country', ''), 'days': daily_forecasts}
 
@@ -122,7 +143,7 @@ def index() -> ResponseReturnValue:
 def login() -> ResponseReturnValue:
 
     form = LoginForm()
-    if form.validate_on_submit(): # this function already verify that methos is POST
+    if form.validate_on_submit(): # this function already verify that method is POST
         user = db.session.scalar(db.select(User).where(User.username == form.username.data))
         password_hash = user.password_hash if user is not None else config.DUMMY_USER_HASH
         if check_password_hash(password_hash, form.password.data) and user is not None:
@@ -133,7 +154,10 @@ def login() -> ResponseReturnValue:
         flask.flash("Username o password non validi.", "error")
         return flask.render_template("login.html", form=form), 401
 
-    status = 400 if form.is_submitted() else 200
+    if form.is_submitted():
+        status = 400
+    else:
+        200
     return flask.render_template("login.html", form=form), status
 
 
@@ -146,17 +170,123 @@ def logout() -> ResponseReturnValue:
 
 @app.route('/leaderboard')
 def leaderboard() -> ResponseReturnValue:
-    return flask.render_template("leaderboard.html")
+    players = db.session.execute(
+        db.select(User.nickname, User.score)
+        .where(User.score > 0)
+        .order_by(User.score.desc(), User.nickname)
+    ).all()
+    return flask.render_template("leaderboard.html", players=players)
 
-@app.route('/quiz')
+
+
+@app.route("/quiz", methods=["GET", "POST"])
 def quiz() -> ResponseReturnValue:
-    return flask.render_template("quiz.html")
+
+    user_id = flask.session.get("user_id")
+    if user_id is None:
+        return flask.redirect(flask.url_for("login"), code=303)
+
+    try:
+        if request.method == "POST":
+            db.session.execute(db.text("BEGIN IMMEDIATE"))
+
+
+        user = db.session.get(User, user_id)
+        if user is None:
+            flask.session.clear()
+            return flask.redirect(flask.url_for("login"), code=303)
+
+        quiz_round = db.session.get(QuizRound, user_id)
+        finished = False
+        question = None
+
+        if quiz_round is not None:
+            finished = quiz_round.position >= len(quiz_round.question_ids)
+            if not finished:
+                question_id = quiz_round.question_ids[quiz_round.position]
+                question = db.get_or_404(Question, question_id)
+
+        #  it's a GET so we render the page. with the resumed question or not
+        if request.method == "GET":
+            return flask.render_template(
+                "quiz.html",
+                user=user,
+                quiz_round=quiz_round,
+                finished=finished,
+                question=question,
+                pass_score=config.QUIZ_PASS_SCORE,
+                round_size=config.QUIZ_ROUND_SIZE,
+                points_per_pass=config.QUIZ_POINTS_PER_PASS,
+            )
+
+        # if it reach this point is a POST
+        action = request.form.get("action")
+        if action == "start":
+
+            # can't start the quiz, need to end the pending one first
+            if quiz_round is not None and not finished:
+                return flask.redirect(flask.url_for("quiz"), code=303)
+
+            question_ids = db.session.scalars(
+                db.select(Question.id)
+                .order_by(db.func.random())
+                .limit(config.QUIZ_ROUND_SIZE)
+            ).all()
+
+            # if there is not enough questions in the db
+            if len(question_ids) < config.QUIZ_ROUND_SIZE:
+                flask.abort(503, description="Il quiz è temporaneamente non disponibile.")
+
+            if quiz_round is None:
+                quiz_round = QuizRound(user_id=user.id)
+                db.session.add(quiz_round)
+
+            quiz_round.question_ids = question_ids
+            quiz_round.position = 0
+            quiz_round.correct_answers = 0
+
+        elif action == "answer":
+
+            # if there is an answer but there is no quiz_round in the database redirect
+            if quiz_round is None or question is None:
+                return flask.redirect(flask.url_for("quiz"), code=303)
+
+            # verify that the question_id from the request is the expected question_id from the quiz_round
+            question_id = request.form.get("question_id", type=int)
+            if question_id != question.id:
+                return flask.redirect(flask.url_for("quiz"), code=303)
+
+            # verify that the answer is coherent
+            answer = request.form.get("answer", type=int)
+            if answer is None or answer not in range(len(question.options)):
+                flask.abort(400, description="Scegli una risposta valida.")
+
+    
+            if answer == question.correct_option:
+                quiz_round.correct_answers += 1
+                flask.flash("Risposta corretta.", "success")
+            else:
+                correct_answer = question.options[question.correct_option]
+                flask.flash(f"Risposta errata. La risposta corretta era «{correct_answer}».", "error")
+
+
+            quiz_round.position += 1
+            if quiz_round.position == len(quiz_round.question_ids):
+                if quiz_round.correct_answers >= config.QUIZ_PASS_SCORE:
+                    user.score += config.QUIZ_POINTS_PER_PASS
+        else: # if is a get with unknown action
+            flask.abort(400, description="Azione non valida.")
+        db.session.commit()
+        return flask.redirect(flask.url_for("quiz"), code=303)
+
+    finally:
+        db.session.rollback()
 
 @app.route('/register', methods=['GET', 'POST'])
 def register() -> ResponseReturnValue:
 
     form = RegistrationForm()
-    if form.validate_on_submit(): # this function already verify that methos is POST
+    if form.validate_on_submit(): # this function already verify that method is POST
         user = User(
             username=form.username.data,
             nickname=form.nickname.data,

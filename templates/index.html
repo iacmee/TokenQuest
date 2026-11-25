@@ -33,21 +33,21 @@
             <thead>
                 <tr>
                     <th scope="col">Giorno</th>
-                    <th scope="col">Diurna <small>(massima)</small></th>
-                    <th scope="col">Notturna <small>(minima)</small></th>
+                    <th scope="col">Media diurna</th>
+                    <th scope="col">Media notturna</th>
                 </tr>
             </thead>
             <tbody>
                 {% for day in weather.days %}
                     <tr>
                         <th scope="row">{{ day.label }} <span>{{ day.date }}</span></th>
-                        <td>{% if day.max_temp is not none %}{{ day.max_temp }} °C{% else %}—{% endif %}</td>
-                        <td>{% if day.min_temp is not none %}{{ day.min_temp }} °C{% else %}—{% endif %}</td>
+                        <td>{% if day.day_temp is not none %}{{ day.day_temp }} °C{% else %}—{% endif %}</td>
+                        <td>{% if day.night_temp is not none %}{{ day.night_temp }} °C{% else %}—{% endif %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <p id="weather-temperatures">La massima e la minima giornaliere sono usate come stime delle temperature diurna e notturna.</p>
+        <p id="weather-temperatures">Per ogni data, le medie sono calcolate sulle ore di luce e di buio nel fuso orario della città.</p>
         <p>Previsioni fornite da <a href="https://open-meteo.com/en/docs">Open-Meteo</a>.</p>
     {% endif %}
 </section>

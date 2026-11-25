@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Quiz · TokenQuest{% endblock %}
+
+{% block content %}
+<section class="quiz-panel" aria-labelledby="quiz-title">
+    <h1 id="quiz-title">Quiz di IA in Python</h1>
+    <p>Punteggio totale <strong>{{ user.score }}</strong></p>
+
+    {% if question %}
+        <p>Domanda {{ quiz_round.position + 1 }} di {{ quiz_round.question_ids | length }}</p>
+        <form method="post" action="{{ url_for('quiz') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="answer">
+            <input type="hidden" name="question_id" value="{{ question.id }}">
+            <fieldset class="quiz-options">
+                <legend>{{ question.text }}</legend>
+                {% for option in question.options %}
+                    <label>
+                        <input type="radio" name="answer" value="{{ loop.index0 }}" required>
+                        {{ option }}
+                    </label>
+                {% endfor %}
+            </fieldset>
+            <button class="nav-button" type="submit">Conferma risposta</button>
+        </form>
+    {% else %}
+        {% if finished %}
+            <h2>Risultato del round</h2>
+            <p>Risposte corrette <strong>{{ quiz_round.correct_answers }} su {{ quiz_round.question_ids | length }}</strong></p>
+            {% if quiz_round.correct_answers >= pass_score %}
+                <p>Hai superato il round. Punti aggiunti alla classifica <strong>{{ points_per_pass }}</strong>.</p>
+            {% else %}
+                <p>Per superare il round servono almeno {{ pass_score }} risposte corrette.</p>
+            {% endif %}
+        {% else %}
+            <p>Rispondi ad almeno {{ pass_score }} domande su {{ round_size }} per superare il round.</p>
+        {% endif %}
+        <form method="post" action="{{ url_for('quiz') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="start">
+            <button class="nav-button" type="submit">{{ "Gioca ancora" if finished else "Inizia il quiz" }}</button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}

@@ -11,6 +11,9 @@ METEO_COORDINATE_URL = "https://geocoding-api.open-meteo.com/v1/search"
 METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 DEFAULT_FORECAST_DAYS = 3
 MAX_FORECAST_DAYS = 15
+QUIZ_ROUND_SIZE = 5
+QUIZ_PASS_SCORE = 4
+QUIZ_POINTS_PER_PASS = 1
 WEEK_DAYS = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica']
 
 ROOT_PATH = Path(__file__).resolve().parent
@@ -19,7 +22,7 @@ DATABASE_PATH = DATABASE_DIR / "app.sqlite"
 SECRET_KEY_PATH = DATABASE_DIR / "secret_key"
 DATABASE_DIR.mkdir(parents=True, exist_ok=True)
 
-# used to spend time verifing the password. Against time-based attack
+# used to spend time verifying the password. Against time-based attack
 DUMMY_USER_HASH = generate_password_hash(secrets.token_hex(32))
 
 

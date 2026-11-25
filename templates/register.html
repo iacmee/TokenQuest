@@ -7,7 +7,7 @@
     <h1>Crea un account</h1>
     
     <form method="post" action="{{ url_for('register') }}">
-        {{ form.hidden_tag() }} <!-- there will be generated csrf-token -->
+        {{ form.hidden_tag() }} <!-- there will be generated csrf-token and other hidden fields -->
 
         {% for field, autocomplete in [
             (form.username, "username"),
