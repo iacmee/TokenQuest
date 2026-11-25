@@ -1,15 +1,28 @@
 import flask
 import config
 import database
+from models import db, User
+from sqlalchemy.exc import SQLAlchemyError
 from waitress import serve
-from paste.translogger import TransLogger
 from flask import request, Response
 import logging
 
 logging.basicConfig(level=logging.INFO,format=config.LOGGING_FORMAT)
 
 app = flask.Flask(__name__)
-database.init(app)
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{config.DATABASE_PATH}"
+db.init_app(app)
+
+try:
+    with app.app_context():
+        with db.engine.connect() as conn:
+            conn.exec_driver_sql("PRAGMA journal_mode=WAL")
+
+        db.create_all()
+
+except SQLAlchemyError as e:
+    print(f"Database error: {e}")
+    raise
 
 @app.route('/')
 def index():
