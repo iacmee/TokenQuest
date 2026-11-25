@@ -7,10 +7,7 @@
     <h1>Crea un account</h1>
     
     <form method="post" action="{{ url_for('register') }}">
-        {{ form.hidden_tag() }}
-        {% if form.csrf_token.errors %}
-            <p class="registration-error" role="alert">Sessione del modulo scaduta o non valida. Riprova.</p>
-        {% endif %}
+        {{ form.hidden_tag() }} <!-- there will be generated csrf-token -->
 
         {% for field, autocomplete in [
             (form.username, "username"),

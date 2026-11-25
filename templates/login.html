@@ -1,8 +1,35 @@
 {% extends "base.html" %}
-{% block title %}Accedi · Iacopo Brunialti{% endblock %}
+{% block title %}Accedi · TokenQuest{% endblock %}
 
 {% block content %}
 
-<h1>OPS</h1>
+<section class="registration">
+    <h1>Accedi</h1>
+    <form method="post" action="{{ url_for('login') }}">
+        {{ form.hidden_tag() }} <!-- there will be generated csrf-token -->
+
+        {% for field, autocomplete in [
+            (form.username, "username"),
+            (form.password, "current-password")
+        ] %}
+            <div class="registration-field">
+                {{ field.label }}
+                {% if field.errors %}
+                    {{ field(autocomplete=autocomplete, required=true, aria_invalid="true", aria_describedby=field.id ~ "-errors") }}
+                    <ul class="registration-error" id="{{ field.id }}-errors">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {{ field(autocomplete=autocomplete, required=true) }}
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button class="nav-button" type="submit">Accedi</button>
+    </form>
+    <p>Non hai ancora un account? <a href="{{ url_for('register') }}">Registrati</a></p>
+</section>
 
 {% endblock %}

@@ -1,29 +1,64 @@
 from flask_wtf import FlaskForm
 from wtforms import EmailField, PasswordField, StringField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
+import config
 
 
-def strip_whitespace(value):
-    return value.strip() if value else value
+def strip_whitespace(value: str | None) -> str | None:
+    if value is None:
+        return None
+    return value.strip()
+
+
+class LoginForm(FlaskForm):
+    username = StringField(
+        "Username",
+        filters=[strip_whitespace],
+        validators=[Length(
+            min=config.LOGIN_USERNAME_MIN_LENGTH,
+            max=config.LOGIN_USERNAME_MAX_LENGTH,
+            message="Inserisci uno username da %(min)d a %(max)d caratteri.",
+        )],
+    )
+    password = PasswordField(
+        "Password",
+        validators=[Length(
+            min=config.LOGIN_PASSWORD_MIN_LENGTH,
+            max=config.LOGIN_PASSWORD_MAX_LENGTH,
+            message="Inserisci una password da %(min)d a %(max)d caratteri.",
+        )],
+    )
 
 
 class RegistrationForm(FlaskForm):
     username = StringField(
         "Username",
         filters=[strip_whitespace],
-        validators=[Length(min=1, max=80, message="Inserisci uno username da 1 a 80 caratteri.")],
+        validators=[Length(
+            min=config.USERNAME_MIN_LENGTH,
+            max=config.USERNAME_MAX_LENGTH,
+            message="Inserisci uno username da %(min)d a %(max)d caratteri.",
+        )],
     )
     email = EmailField(
         "Email",
         filters=[strip_whitespace],
         validators=[
-            Length(max=254, message="L’indirizzo email può contenere al massimo 254 caratteri."),
+            Length(
+                min=config.EMAIL_MIN_LENGTH,
+                max=config.EMAIL_MAX_LENGTH,
+                message="L’indirizzo email deve contenere da %(min)d a %(max)d caratteri.",
+            ),
             Email(message="Inserisci un indirizzo email valido."),
         ],
     )
     password = PasswordField(
         "Password",
-        validators=[Length(min=10, max=128, message="Usa da 10 a 128 caratteri.")],
+        validators=[Length(
+            min=config.PASSWORD_MIN_LENGTH,
+            max=config.PASSWORD_MAX_LENGTH,
+            message="Inserisci una password da %(min)d a %(max)d caratteri.",
+        )],
     )
     confirm_password = PasswordField(
         "Conferma password",
