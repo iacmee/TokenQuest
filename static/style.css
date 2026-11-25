@@ -6,10 +6,16 @@ body {
     margin: 0;
     min-height: 100vh;
 
+    display: flex;
+    flex-direction: column;
+
     background-color: #f4faff;
     color: #0c4a6e;
-
     font-family: "Segoe UI", Arial, sans-serif;
+}
+
+main {
+    flex: 1;
 }
 
 button,
@@ -195,4 +201,186 @@ input {
     .nav-links a {
         font-size: 14px;
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Piè di pagina */
+
+.site-footer {
+    background: linear-gradient(
+        120deg,
+        #e0f2fe,
+        #bae6fd,
+        #7dd3fc
+    );
+
+    border-top: 1px solid #7dd3fc;
+    padding: 30px;
+    color: #0c4a6e;
+}
+
+
+/* Contenitore principale */
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 25px;
+
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+/* Logo */
+
+.footer-brand a {
+    color: #0c4a6e;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-decoration: none;
+}
+
+.footer-brand span {
+    color: #0284c7;
+}
+
+.footer-brand p {
+    color: #075985;
+    font-size: 14px;
+    margin: 8px 0 0;
+}
+
+
+/* Autore */
+
+.footer-author {
+    text-align: right;
+}
+
+.footer-author small {
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.footer-author h3 {
+    font-size: 18px;
+    margin: 6px 0;
+}
+
+.footer-author a {
+    color: #0369a1;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.footer-author a:hover {
+    text-decoration: underline;
+}
+
+
+/* Copyright */
+
+.footer-bottom {
+    max-width: 1200px;
+
+    margin: 25px auto 0;
+    padding-top: 18px;
+
+    border-top: 1px solid rgba(2, 132, 199, 0.2);
+
+    text-align: center;
+    font-size: 13px;
+    color: #075985;
+}
+
+
+/* Adattamento agli smartphone */
+
+@media (max-width: 600px) {
+
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-author {
+        text-align: center;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+.flash-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 30px;
+}
+
+.flash {
+    padding: 14px 20px;
+    margin-bottom: 12px;
+
+    background-color: #e0f2fe;
+    color: #075985;
+
+    border: 1px solid #7dd3fc;
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* Operazione riuscita */
+.flash[data-category="success"] {
+    background-color: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+}
+
+/* Errore */
+.flash[data-category="error"] {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+/* Avvertimento */
+.flash[data-category="warning"] {
+    background-color: #fef3c7;
+    border-color: #fcd34d;
+    color: #92400e;
 }

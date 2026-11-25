@@ -16,7 +16,7 @@
 
 <header class="site-header">
 
-    <nav class="navbar" aria-label="Navigazione principale">
+    <nav class="navbar">
 
         <!-- Logo -->
         <a class="brand" href="{{ url_for('index') }}">
@@ -58,14 +58,62 @@
 
 </header>
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+<main>
 
-    <footer>
-        Creato da Iacopo Brunialti
-    </footer>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container" aria-live="polite">
+
+                {% for category, message in messages %}
+
+                    <div class="flash" data-category="{{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+    {% block content %}
+    {% endblock %}
+
+</main>
+
+<footer class="site-footer">
+
+    <div class="footer-container">
+
+        <!-- Informazioni sul sito -->
+        <div class="footer-brand">
+            <a href="{{ url_for('index') }}">
+                ✳ Token<span>Quest</span>
+            </a>
+
+            <p>Mettiti alla prova e scala la !leaderboard!</p>
+        </div>
+
+        <!-- Informazioni sull'autore -->
+        <div class="footer-author">
+
+            <small>SVILUPPATO DA</small>
+
+            <h3>Iacopo Brunialti</h3>
+
+            <a href="mailto:iacopo.brunialti@gmail.com">
+                iacopo.brunialti@gmail.com
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>
 
 </body>
 </html>
