@@ -18,6 +18,7 @@ main {
     flex: 1;
 }
 
+.home-intro,
 .weather-panel,
 .leaderboard-panel,
 .quiz-panel {
@@ -30,11 +31,44 @@ main {
     box-shadow: 0 12px 30px rgba(3, 105, 161, 0.08);
 }
 
-.weather-panel h1,
+.home-intro h1,
+.weather-panel h2,
 .leaderboard-panel h1,
 .quiz-panel h1 {
     margin: 0;
     font-size: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.home-intro {
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #e0f2fe, #fff);
+}
+
+.home-intro + .weather-panel {
+    margin-top: 1rem;
+}
+
+.home-intro p {
+    max-width: 55ch;
+    line-height: 1.5;
+}
+
+.home-quiz-link {
+    display: inline-block;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    background: #075985;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.home-quiz-link:hover {
+    background: #0c4a6e;
+}
+
+.home-intro .home-access-note {
+    margin-bottom: 0;
 }
 
 .quiz-options {

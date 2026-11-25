@@ -33,7 +33,7 @@ def handle_csrf_error(error: CSRFError) -> ResponseReturnValue:
 try:
     with app.app_context():
         with db.engine.connect() as conn:
-            conn.exec_driver_sql("PRAGMA journal_mode=WAL")
+            conn.exec_driver_sql("PRAGMA journal_mode=DELETE")
             conn.exec_driver_sql("BEGIN IMMEDIATE")
             db.metadata.create_all(conn)
             question_count = conn.scalar(db.select(db.func.count()).select_from(Question))
@@ -149,7 +149,8 @@ def login() -> ResponseReturnValue:
         if check_password_hash(password_hash, form.password.data) and user is not None:
             flask.session.clear()
             flask.session["user_id"] = user.id
-            return flask.redirect(flask.url_for("index"), code=303)
+            destination = "quiz" if request.args.get("next") == "quiz" else "index"
+            return flask.redirect(flask.url_for(destination), code=303)
 
         flask.flash("Username o password non validi.", "error")
         return flask.render_template("login.html", form=form), 401
@@ -184,7 +185,7 @@ def quiz() -> ResponseReturnValue:
 
     user_id = flask.session.get("user_id")
     if user_id is None:
-        return flask.redirect(flask.url_for("login"), code=303)
+        return flask.redirect(flask.url_for("login", next="quiz"), code=303)
 
     try:
         if request.method == "POST":

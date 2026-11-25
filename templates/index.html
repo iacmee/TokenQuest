@@ -2,8 +2,17 @@
 {% block title %}Home · TokenQuest{% endblock %}
 
 {% block content %}
+<section class="home-intro" aria-labelledby="home-title">
+    <h1 id="home-title">TokenQuest</h1>
+    <p>Metti alla prova quello che sai su come i computer capiscono e generano il linguaggio. Supera i round per guadagnare punti e salire in classifica.</p>
+    <a class="home-quiz-link" href="{{ url_for('quiz') }}">Vai al quiz</a>
+    {% if session.get('user_id') is none %}
+        <p class="home-access-note">Per giocare, accedi o <a href="{{ url_for('register') }}">crea un account</a>.</p>
+    {% endif %}
+</section>
+
 <section class="weather-panel" aria-labelledby="weather-title">
-    <h1 id="weather-title">Previsioni meteo</h1>
+    <h2 id="weather-title">Previsioni meteo</h2>
     <p>Cerca una città e scegli per quanti giorni vedere le previsioni.</p>
 
     <form class="weather-form" method="get" action="{{ url_for('index') }}">
