@@ -2,6 +2,8 @@
 
 Sito Flask con un quiz sul linguaggio naturale, una classifica per nickname e previsioni da Open-Meteo. Il quiz richiede un account. Ogni round propone 5 domande casuali e assegna 1 punto con almeno 4 risposte corrette.
 
+[Guarda la demo di TokenQuest](Screencast%20from%202026-11-25%2022-57-15.mp4).
+
 ## Avvio in locale
 
 Con Python 3.12, esegui questi comandi dalla cartella del progetto:
