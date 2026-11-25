@@ -157,7 +157,7 @@ def login() -> ResponseReturnValue:
     if form.is_submitted():
         status = 400
     else:
-        200
+        status = 200
     return flask.render_template("login.html", form=form), status
 
 
@@ -207,7 +207,7 @@ def quiz() -> ResponseReturnValue:
                 question = db.get_or_404(Question, question_id)
 
         #  it's a GET so we render the page. with the resumed question or not
-        if request.method == "GET":
+        if request.method in ("GET", "HEAD"):
             return flask.render_template(
                 "quiz.html",
                 user=user,
