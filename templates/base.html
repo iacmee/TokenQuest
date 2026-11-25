@@ -7,25 +7,56 @@
     <!-- impostazione per i dispositivi mobili -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}Iacopo Brunialti{% endblock %}</title>
+    <title>{% block title %}TokenQuest{% endblock %}</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-    <header>
-        <nav class="navigation-menu">
-            <a class="logo" href="{{ url_for('index') }}">
-                home
-            </a>
+<header class="site-header">
 
-            <div class="navigation-links">
-                <a href="{{ url_for('index') }}">Home</a>
+    <nav class="navbar" aria-label="Navigazione principale">
+
+        <!-- Logo -->
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-icon">✳</span>
+            Token<span>Quest</span>
+        </a>
+
+        <!-- Collegamenti di navigazione -->
+        <div class="nav-links">
+
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('leaderboard') }}">Classifica</a>
+
+            {% if session.get('user_id') is not none %}
+
+                <!-- Utente autenticato -->
+                <a href="{{ url_for('quiz') }}">Quiz</a>
+
+                <form action="{{ url_for('logout') }}" method="post">
+                    <button class="nav-button" type="submit">
+                        Esci ↗
+                    </button>
+                </form>
+
+            {% else %}
+
+                <!-- Utente non autenticato -->
                 <a href="{{ url_for('login') }}">Accedi</a>
-            </div>
-        </nav>
-    </header>
+
+                <a class="nav-cta" href="{{ url_for('register') }}">
+                    Inizia a giocare ↗
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+</header>
 
     <main>
         {% block content %}

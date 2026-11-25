@@ -1,7 +1,198 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    background-color: #f4faff;
+    color: #0c4a6e;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+button,
+input {
+    font-family: inherit;
+}
 
 
-.navigation-menu {
-    background: #15172e;
+/* Intestazione */
+
+.site-header {
+    background: linear-gradient(
+        120deg,
+        #e0f2fe,
+        #bae6fd,
+        #7dd3fc
+    );
+
+    border-bottom: 1px solid #7dd3fc;
+    box-shadow: 0 4px 18px rgba(3, 105, 161, 0.08);
+}
+
+
+/* Contenitore di navigazione */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px;
+}
+
+
+/* Logo */
+
+.brand {
+    display: flex;
+    align-items: center;
+
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+
+    color: #0c4a6e;
+    text-decoration: none;
+}
+
+.brand span {
+    color: #0284c7;
+}
+
+
+/* Icona del logo */
+
+.brand .brand-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+    margin-right: 10px;
+
+    background-color: #0284c7;
     color: white;
-    border-bottom: 1px solid #ffffff1c;
+
+    border-radius: 12px;
+    font-size: 23px;
+}
+
+
+/* Contenitore dei collegamenti */
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+
+/* Collegamenti */
+
+.nav-links a {
+    color: #075985;
+
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+
+    padding: 9px 12px;
+    border-radius: 8px;
+
+    transition: background-color 0.2s,
+                color 0.2s;
+}
+
+.nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #0369a1;
+}
+
+
+/* Pulsante di registrazione */
+
+.nav-links .nav-cta {
+    background-color: #0284c7;
+    color: white;
+
+    padding: 12px 19px;
+    border-radius: 10px;
+
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+
+    transition: background-color 0.2s,
+                transform 0.2s,
+                box-shadow 0.2s;
+}
+
+.nav-links .nav-cta:hover {
+    background-color: #0369a1;
+    color: white;
+
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3);
+}
+
+
+/* Form di logout */
+
+.nav-links form {
+    margin: 0;
+}
+
+
+/* Pulsante di logout */
+
+.nav-button {
+    background-color: rgba(255, 255, 255, 0.45);
+    color: #0369a1;
+
+    border: 1px solid #38bdf8;
+    border-radius: 10px;
+
+    padding: 10px 18px;
+
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s,
+                transform 0.2s;
+}
+
+.nav-button:hover {
+    background-color: white;
+    transform: translateY(-2px);
+}
+
+
+/* Adattamento agli smartphone */
+
+@media (max-width: 600px) {
+
+    .navbar {
+        flex-direction: column;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .nav-links {
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .nav-links a {
+        font-size: 14px;
+    }
 }

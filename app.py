@@ -19,6 +19,18 @@ def index():
 def login():
     return flask.render_template("login.html")
 
+@app.route('/leaderboard')
+def leaderboard():
+    return flask.render_template("leaderboard.html")
+
+@app.route('/quiz')
+def quiz():
+    return flask.render_template("quiz.html")
+
+@app.route('/register')
+def register():
+    return flask.render_template("register.html")
+
 
 
 
