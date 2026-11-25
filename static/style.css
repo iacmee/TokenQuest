@@ -414,20 +414,6 @@ input {
 }
 
 
-/* Adattamento agli smartphone */
-
-@media (max-width: 600px) {
-
-    .footer-container {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .footer-author {
-        text-align: center;
-    }
-}
-
 
 
 

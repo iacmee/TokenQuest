@@ -159,6 +159,7 @@ def register() -> ResponseReturnValue:
     if form.validate_on_submit(): # this function already verify that methos is POST
         user = User(
             username=form.username.data,
+            nickname=form.nickname.data,
             email=form.email.data,
             password_hash=generate_password_hash(form.password.data),
         )
@@ -170,7 +171,16 @@ def register() -> ResponseReturnValue:
             db.session.rollback()
             if getattr(error.orig, "sqlite_errorcode", None) != sqlite3.SQLITE_CONSTRAINT_UNIQUE:
                 raise
-            flask.flash("Username o indirizzo email già in uso.", "error")
+            conflicts = {
+                "UNIQUE constraint failed: users.username": (form.username, "Username già in uso."),
+                "UNIQUE constraint failed: users.email": (form.email, "Indirizzo email già in uso."),
+                "UNIQUE constraint failed: users.nickname": (form.nickname, "Nickname già in uso."),
+            }
+            conflict = conflicts.get(str(error.orig))
+            if conflict is None:
+                raise
+            field, message = conflict
+            field.errors.append(message)
             return flask.render_template("register.html", form=form), 409
 
         flask.flash("Account creato. Ora puoi accedere.", "success")

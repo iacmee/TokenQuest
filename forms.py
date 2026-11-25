@@ -40,6 +40,15 @@ class RegistrationForm(FlaskForm):
             message="Inserisci uno username da %(min)d a %(max)d caratteri.",
         )],
     )
+    nickname = StringField(
+        "Nickname",
+        filters=[strip_whitespace],
+        validators=[Length(
+            min=config.NICKNAME_MIN_LENGTH,
+            max=config.NICKNAME_MAX_LENGTH,
+            message="Inserisci un nickname da %(min)d a %(max)d caratteri.",
+        )],
+    )
     email = EmailField(
         "Email",
         filters=[strip_whitespace],

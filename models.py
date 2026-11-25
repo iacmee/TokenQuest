@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
+import config
 
 db = SQLAlchemy()
 
@@ -14,6 +15,12 @@ class User(db.Model):
         db.String(80, collation="NOCASE"),
         nullable=False,
         unique=True
+    )
+
+    nickname = db.Column(
+        db.String(config.NICKNAME_MAX_LENGTH, collation="NOCASE"),
+        nullable=False,
+        unique=True,
     )
 
     email = db.Column(
