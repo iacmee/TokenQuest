@@ -1,7 +1,6 @@
 import flask
 import config
 import sqlite3
-import secrets
 from flask_wtf.csrf import CSRFError, CSRFProtect
 from forms import LoginForm, RegistrationForm
 from models import db, User
@@ -11,6 +10,11 @@ from waitress import serve
 from flask import request, Response
 import logging
 from flask.typing import ResponseReturnValue
+import json
+from urllib.parse import urlencode
+from urllib.request import urlopen
+from typing import Any
+from datetime import date
 
 logging.basicConfig(level=logging.INFO,format=config.LOGGING_FORMAT)
 
@@ -34,6 +38,58 @@ try:
 except SQLAlchemyError as e:
     print(f"Database error: {e}")
     raise
+
+
+def fetch_json_from_url(url: str, parameters: dict[str, Any]) -> Any:
+    full_url = f"{url}?{urlencode(parameters)}"
+    with urlopen(full_url, timeout=6) as response:
+        return json.load(response)
+
+def weather_from_city(city : str) -> dict | None:
+    params = {
+        "name": city,
+        "count": 1,
+        "language": "it",
+    }
+    try:
+        locations = fetch_json_from_url(config.METEO_COORDINATE_URL, params).get('results', [])
+        if not locations:
+            return None
+
+        location = locations[0]
+
+        params = {
+            "latitude": location["latitude"],
+            "longitude": location["longitude"],
+            "timezone": location["timezone"],
+            "daily": "temperature_2m_max,temperature_2m_min",
+            "forecast_days": config.FORECAST_DAYS,
+        }
+
+        forecast = fetch_json_from_url(config.METEO_FORECAST_URL, params)
+        forecast = forecast["daily"]
+    
+        dates = forecast["time"]
+        max_temps = forecast["temperature_2m_max"]
+        min_temps = forecast["temperature_2m_min"]
+
+        days = []
+
+        for day, max_temp, min_temp in zip(dates, max_temps, min_temps, strict=True):
+            parsed = date.fromisoformat(day)
+            days.append({
+                "label": config.WEEK_DAYS[parsed.weekday()],
+                "date": parsed.strftime("%d/%m/%Y"),
+                "max_temp": max_temp,
+                "min_temp": min_temp,
+            })
+        return {'name': location['name'], 'country': location.get('country', ''), 'days': days}
+
+    except Exception as e:
+        logging.error("Unable to retrieve weather data for %s: %s", city, e)
+        return None
+
+
 
 @app.route('/')
 def index():
