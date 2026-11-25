@@ -1,8 +1,9 @@
 import flask
 import config
-import database
+from forms import RegistrationForm
 from models import db, User
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from werkzeug.security import generate_password_hash
 from waitress import serve
 from flask import request, Response
 import logging
@@ -10,6 +11,7 @@ import logging
 logging.basicConfig(level=logging.INFO,format=config.LOGGING_FORMAT)
 
 app = flask.Flask(__name__)
+app.config["SECRET_KEY"] = config.load_secret_key()
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{config.DATABASE_PATH}"
 db.init_app(app)
 
@@ -40,9 +42,32 @@ def leaderboard():
 def quiz():
     return flask.render_template("quiz.html")
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return flask.render_template("register.html")
+
+    form = RegistrationForm()
+    if form.validate_on_submit(): # this function already verify that methos is POST
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            password_hash=generate_password_hash(form.password.data),
+        )
+        db.session.add(user)
+
+        try:
+            db.session.commit()
+        except IntegrityError as error:
+            db.session.rollback()
+            if getattr(error.orig, "sqlite_errorcode", None) != sqlite3.SQLITE_CONSTRAINT_UNIQUE:
+                raise
+            flask.flash("Username o indirizzo email già in uso.", "error")
+            return flask.render_template("register.html", form=form), 409
+
+        flask.flash("Account creato. Ora puoi accedere.", "success")
+        return flask.redirect(flask.url_for("login"), code=303)
+
+    status = 400 if form.is_submitted() else 200
+    return flask.render_template("register.html", form=form), status
 
 
 
